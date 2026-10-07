@@ -9,8 +9,6 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 
 help() {
-    # echo -n "Watch allows easy management for working directories"
-    # echo "-d: watches the current directory"
     cat << EOF
 	
 	Watch is a tool used to quickly traverse between deep file directories. Strings of the paths are 
