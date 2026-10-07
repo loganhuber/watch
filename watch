@@ -1,0 +1,139 @@
+#!/bin/bash
+
+## TODO:
+# function for removing a single directory from the list
+
+TEMP=~/bin/.watching.txt
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+help() {
+    # echo -n "Watch allows easy management for working directories"
+    # echo "-d: watches the current directory"
+    cat << EOF
+	
+	Watch is a tool used to quickly traverse between deep file directories. Strings of the paths are 
+	stored, and in one command you can quickly copy the directory path string to your clipboard. Now
+	you can type 'cd' and paste the directory string. Maybe even set it to an alias if you want. You
+	will be navagating the file system like a wizard.  
+
+
+        USAGE: watch [OPTIONS]
+
+      Default/No Args _______________ Start watching the current working directory
+
+    -p | --print ____________________ Print indexed directories
+
+   -cp n  | --copy n ________________ Pass the index of a directory and the path string
+                                      will be copied to your clipboard
+
+  -clr | --clear ____________________ Clears all watched directory history. Path strings are
+				      not removed between sessions. If you want to remove them
+				      clear manually with this command
+
+    -l | --length ___________________ Print number of watched paths
+    
+    -h | --help _____________________ Opens help page
+
+EOF
+    
+}
+
+aintFile() {
+    if [ -f "$PWD/$TEMP" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+length() {
+    local NUM=$(wc -l < $TEMP)
+    echo "Watching: $NUM"
+}
+
+printDirs() {
+    local count=1
+    while IFS= read -r line; do
+        printf "${YELLOW}$count)${NC} $line\n"
+        ((count++))
+    done < $TEMP
+}
+
+alreadyWatched() {
+    while IFS= read -r line; do
+        if [[ "$PWD" == $line ]]; then
+            return 0
+        fi
+    done < $TEMP
+    return 1
+}
+
+findDir() {
+    local arr=()
+    local i=$1
+    local index=$((i - 1))
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        arr+=("$line")
+    done < $TEMP
+
+    echo -n "${arr[$index]}"
+}
+
+# makeAlias() {
+#     local num=$1
+#     local als=$2
+#     local dir=$(findDir $num)
+
+#     # alias $als="cd '$dir'"
+#     echo $als="cd '$dir'"
+
+#     # echo 'created alias'
+# }
+
+main() {
+
+    if [ aintFile ];then 
+        touch $TEMP
+    fi
+
+   case $1 in
+        # "-a")
+        #     # take number and then alias
+        #     makeAlias $2 $3
+        # ;;
+        -clr|--clear)
+            > $TEMP
+        ;;
+        '')
+            if alreadyWatched; then
+        #        echo "Already watching directory"
+		printf "${RED}Already watching directory${NC}\n"
+            else
+                pwd >> $TEMP    
+            fi
+        ;;
+        -p|--print)
+            printDirs
+        ;;
+        -l|--length)
+            length
+        ;;
+        -cp|--copy)
+            printf '"%s"' "$(findDir $2)" | pbcopy
+        ;;
+        -h|--help)
+            help
+        ;;
+        *)
+            echo "You need help. Use -h for help. thanks"
+            exit 1
+        ;;
+    esac
+
+    exit 0
+}
+
+main $@
