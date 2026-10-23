@@ -31,6 +31,8 @@ help() {
 				      clear manually with this command
 
     -l | --length ___________________ Print number of watched paths
+
+  -r n | --remove n _________________ Remove one saved filepath by index number
     
     -h | --help _____________________ Opens help page
 
@@ -80,6 +82,11 @@ findDir() {
     echo -n "${arr[$index]}"
 }
 
+removeDir() {
+    local index=$1
+    sed -i "" "${index}d" $TEMP
+}
+
 # makeAlias() {
 #     local num=$1
 #     local als=$2
@@ -124,6 +131,9 @@ main() {
         ;;
         -h|--help)
             help
+        ;;
+        -r|--remove)
+            removeDir $2
         ;;
         *)
             echo "You need help. Use -h for help. thanks"
