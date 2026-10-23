@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ## TODO:
-# function for removing a single directory from the list
 
 TEMP=~/bin/.watching.txt
 RED='\033[0;31m'
@@ -23,7 +22,7 @@ help() {
 
     -p | --print ____________________ Print indexed directories
 
-   -cp n  | --copy n ________________ Pass the index of a directory and the path string
+-cp n  | --copy n ___________________ Pass the index of a directory and the path string
                                       will be copied to your clipboard
 
   -clr | --clear ____________________ Clears all watched directory history. Path strings are
@@ -84,19 +83,14 @@ findDir() {
 
 removeDir() {
     local index=$1
-    sed -i "" "${index}d" $TEMP
+    local LINE_COUNT=$(wc -l < $TEMP)
+
+    if ! [[ "$index" =~ ^[0-9]+$ ]]; then
+        printf "${RED}Index must be a number${NC}\n"
+    else
+        sed -i "" "${index}d" $TEMP
+    fi
 }
-
-# makeAlias() {
-#     local num=$1
-#     local als=$2
-#     local dir=$(findDir $num)
-
-#     # alias $als="cd '$dir'"
-#     echo $als="cd '$dir'"
-
-#     # echo 'created alias'
-# }
 
 main() {
 
@@ -105,16 +99,11 @@ main() {
     fi
 
    case $1 in
-        # "-a")
-        #     # take number and then alias
-        #     makeAlias $2 $3
-        # ;;
         -clr|--clear)
             > $TEMP
         ;;
         '')
             if alreadyWatched; then
-        #        echo "Already watching directory"
 		printf "${RED}Already watching directory${NC}\n"
             else
                 pwd >> $TEMP    
